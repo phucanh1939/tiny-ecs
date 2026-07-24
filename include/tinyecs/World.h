@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 
+#include <tinyecs/ComponentStorageRegistry.h>
 #include <tinyecs/Entity.h>
 #include <tinyecs/Query.h>
 
@@ -65,14 +66,14 @@ namespace tinyecs
         // For example, when std::vector<World> grows and relocates its elements to a
         // new memory location, noexcept guarantees that it can safely move World
         // objects without worrying about a failed move operation.
-        World(World&&) noexcept;
-        World& operator=(World&&) noexcept;
+        World(World&&) noexcept = default;
+        World& operator=(World&&) noexcept = default;
 
         Entity createEntity();
 
         void destroyEntity(Entity entity);
 
-        bool isAlive(Entity entity) const;
+        bool isValid(Entity entity) const;
 
         template<typename TComponent>
         void addComponent(Entity entity, TComponent component);
@@ -83,11 +84,18 @@ namespace tinyecs
         template<typename... TComponents>
         Query<TComponents...> query();
 
+        void debugPrintMemoryLayout() const;
+
     private:
         // Stores the current version for each entity ID.
         std::vector<std::uint32_t> _versions;
 
         // Tracks whether each entity ID is currently alive.
         std::vector<bool> _alive;
+
+        // Stores component storage grouped by component type.
+        ComponentStorageRegistry _componentStorages;
     };
 }
+
+#include <tinyecs/World.inl>

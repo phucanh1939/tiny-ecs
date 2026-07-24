@@ -17,53 +17,65 @@ namespace tinyecs
         _versions.push_back(1);
         _alive.push_back(true);
 
-        return Entity(id, _versions[id]);
+        return Entity{id, _versions[id]};
     }
 
     void World::destroyEntity(Entity entity)
     {
-        if (!isAlive(entity))
+        if (!isValid(entity))
         {
             return;
         }
 
-        _alive[entity.id()] = false;
-        ++_versions[entity.id()];
+        _alive[entity.id] = false;
+        ++_versions[entity.id];
     }
 
-    bool World::isAlive(Entity entity) const
+    bool World::isValid(Entity entity) const
     {
         if (!entity.isValid())
         {
             return false;
         }
 
-        if (entity.id() >= _versions.size())
+        if (entity.id >= _versions.size())
         {
             return false;
         }
 
-        return _alive[entity.id()] &&
-               _versions[entity.id()] == entity.version();
+        return _alive[entity.id] && _versions[entity.id] == entity.version;
     }
 
-    template <typename TComponent>
-    void World::addComponent(Entity entity, TComponent component)
+    void World::debugPrintMemoryLayout() const
     {
-        // TODO: Implement component storage.
-    }
+        std::cout << "entity_versions: [";
 
-    template <typename TComponent>
-    void World::removeComponent(Entity entity)
-    {
-        // TODO: Implement component storage.
-    }
+        for (std::size_t i = 0; i < _versions.size(); ++i)
+        {
+            if (i > 0)
+            {
+                std::cout << ", ";
+            }
 
-    template <typename... TComponents>
-    Query<TComponents...> World::query()
-    {
-        Test test;
-        // TODO: Implement query creation.
-        return {};
+            std::cout << _versions[i];
+        }
+
+        std::cout << "]\n";
+
+        std::cout << "entity_alives: [";
+
+        for (std::size_t i = 0; i < _alive.size(); ++i)
+        {
+            if (i > 0)
+            {
+                std::cout << ", ";
+            }
+
+            std::cout << _alive[i];
+        }
+
+        std::cout << "]\n";
+
+        _componentStorages.debugPrintMemoryLayout();
     }
 }

@@ -1,0 +1,1 @@
+cmake --build build && ./build/tests/tinyecs-tests

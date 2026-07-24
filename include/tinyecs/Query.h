@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tinyecs/ComponentStorageRegistry.h>
+
 namespace tinyecs
 {
     // Represents a view over entities that contain the requested component types.
@@ -44,9 +46,34 @@ namespace tinyecs
     class Query
     {
     public:
-        class Iterator;
+        class Iterator
+        {
+        public:
+            Iterator(ComponentStorageRegistry& componentStorages, std::size_t index, std::size_t endIndex);
+
+            Entity operator*() const;
+
+            Iterator& operator++();
+
+            bool operator!=(const Iterator& other) const;
+
+        private:
+            void skipInvalidEntities();
+
+            ComponentStorageRegistry& _componentStorages;
+            std::size_t _index;
+            std::size_t _endIndex;
+        };
+
+        Query(ComponentStorageRegistry& componentStorages);
 
         Iterator begin();
+
         Iterator end();
+
+    private:
+        ComponentStorageRegistry& _componentStorages;
     };
 }
+
+#include <tinyecs/Query.inl>

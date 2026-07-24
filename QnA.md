@@ -1,0 +1,1 @@
+Why Template implement need to be visible in header? what if I put it in a cpp file like normal implement
