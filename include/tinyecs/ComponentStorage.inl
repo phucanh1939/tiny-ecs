@@ -91,12 +91,14 @@ namespace tinyecs
     }
 
     template <typename TComponent>
-    void ComponentStorage<TComponent>::debugPrintMemoryLayout() const
+    void ComponentStorage<TComponent>::print() const
     {
         std::cout << typeid(TComponent).name()
                   << "(size: "
                   << sizeof(TComponent)
-                  << "): [";
+                  << "):\n";
+
+        std::cout << "\t * Components: [";
 
         for (std::size_t i = 0; i < _components.size(); ++i)
         {
@@ -109,5 +111,33 @@ namespace tinyecs
         }
 
         std::cout << "]\n";
+
+        std::cout << "\t * Entities: [";
+
+        for (std::size_t i = 0; i < _entities.size(); ++i)
+        {
+            if (i > 0)
+            {
+                std::cout << ", ";
+            }
+
+            std::cout << _entities[i].id;
+        }
+
+        std::cout << "]\n";
+
+        std::cout << "\t * Entity to index: [";
+
+        for (std::size_t i = 0; i < _entityToIndex.size(); ++i)
+        {
+            if (i > 0)
+            {
+                std::cout << ", ";
+            }
+
+            std::cout << _entityToIndex[i];
+        }
+
+        std::cout << "]\n\n";
     }
 }

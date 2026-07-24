@@ -8,7 +8,7 @@ namespace tinyecs
     {
         for (const auto &[type, storage] : _storages)
         {
-            storage->debugPrintMemoryLayout();
+            storage->print();
         }
     }
 }

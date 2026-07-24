@@ -46,7 +46,7 @@ namespace tinyecs
         return _alive[entity.id] && _versions[entity.id] == entity.version;
     }
 
-    void World::debugPrintMemoryLayout() const
+    void World::print() const
     {
         std::cout << "entity_versions: [";
 

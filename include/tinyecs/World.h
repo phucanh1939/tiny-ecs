@@ -84,7 +84,7 @@ namespace tinyecs
         template<typename... TComponents>
         Query<TComponents...> query();
 
-        void debugPrintMemoryLayout() const;
+        void print() const;
 
     private:
         // Stores the current version for each entity ID.

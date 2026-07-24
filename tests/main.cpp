@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 
 #include <tinyecs/World.h>
 
@@ -15,32 +16,36 @@ struct Velocity
     float z;
 };
 
+struct Health
+{
+    float currentHealth;
+    float maxHealth;
+};
+
 int main()
 {
+    constexpr int entityCount = 5;
+
     tinyecs::World world;
+    tinyecs::Entity entities[entityCount];
 
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < entityCount; ++i)
     {
-        tinyecs::Entity entity = world.createEntity();
-
-        world.addComponent(
-            entity,
-            Position{
-                static_cast<float>(i),
-                static_cast<float>(i)
-            }
-        );
-
-        world.addComponent(
-            entity,
-            Velocity{
-                1.0f,
-                0.0f
-            }
-        );
+        entities[i] = world.createEntity();
+        world.addComponent(entities[i], Position{1.1f, 2.2f});
+        world.addComponent(entities[i], Velocity{1.0f, 0.0f, 2.0f});
     }
 
-    world.debugPrintMemoryLayout();
+    world.print();
+
+    world.removeComponent<Position>(entities[2]);
+    world.removeComponent<Velocity>(entities[1]);
+    world.addComponent<Health>(entities[4], Health{});
+    world.destroyEntity(entities[3]);
+    std::cout << "----------------" << std::endl;
+
+
+    world.print();
 
     return 0;
 }

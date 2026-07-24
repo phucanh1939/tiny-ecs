@@ -7,6 +7,6 @@ namespace tinyecs
     public:
         virtual ~IComponentStorage() = default;
 
-        virtual void debugPrintMemoryLayout() const = 0;
+        virtual void print() const = 0;
     };
 }

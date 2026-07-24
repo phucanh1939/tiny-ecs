@@ -22,7 +22,7 @@ namespace tinyecs
 
         const TComponent& get(Entity entity) const;
 
-        void debugPrintMemoryLayout() const override;
+        void print() const override;
     private:
         // Components are stored densely.
         std::vector<TComponent> _components;
