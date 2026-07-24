@@ -5,6 +5,7 @@
 int main()
 {
     tinyecs::World world;
+    // world.query();
 
     assert(true);
 
