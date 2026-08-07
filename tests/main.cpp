@@ -3,6 +3,8 @@
 
 #include <tinyecs/ArchetypeRegistry.h>
 #include <tinyecs/ComponentSignature.h>
+#include <tinyecs/ComponentRegistry.h>
+#include <tinyecs/ComponentType.h>
 
 using namespace tinyecs;
 
@@ -194,6 +196,36 @@ void testArchetypeSwapBack()
     printPassed("Archetype swap-back");
 }
 
+void testComponentRegistry()
+{
+    ComponentRegistry registry;
+
+    struct Position
+    {
+        float x;
+        float y;
+    };
+
+    struct Velocity
+    {
+        float x;
+        float y;
+    };
+
+
+    ComponentInfo position = registry.get<Position>();
+    ComponentInfo positionAgain = registry.get<Position>();
+    ComponentInfo velocity = registry.get<Velocity>();
+
+    assert(position.type == positionAgain.type);
+    assert(position.type != velocity.type);
+
+    assert(position.size == sizeof(Position));
+    assert(velocity.size == sizeof(Velocity));
+
+    printPassed("Component registry");
+}
+
 int main()
 {
     testComponentSignature();
@@ -209,6 +241,8 @@ int main()
     testArchetypeAddEntity();
     testArchetypeRemoveLastEntity();
     testArchetypeSwapBack();
+
+    testComponentRegistry();
 
     std::cout << "\033[32m✓ All tests passed\033[0m\n";
 
