@@ -41,25 +41,3 @@ Run tests:
 ```bash
 ./build/tests/tinyecs-tests
 ```
-
-## Current Focus
-
-Start with the fundamental ECS concepts:
-
-```text
-Entity
-  ↓
-World
-  ↓
-Component
-  ↓
-System
-  ↓
-Query
-  ↓
-Archetype
-  ↓
-Chunk
-```
-
-The implementation will evolve gradually from simple, easy-to-understand storage toward a more data-oriented ECS design.
