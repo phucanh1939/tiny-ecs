@@ -17,6 +17,14 @@ namespace tinyecs
     class Archetype
     {
     public:
+        // Prevent implicit conversion from ComponentSignature to Archetype.
+        //
+        // Without explicit:
+        //     ComponentSignature signature;
+        //     Archetype archetype = signature; // Compiles, but creates Archetype implicitly.
+        //
+        // With explicit:
+        //     Archetype archetype(signature); // Must construct explicitly.
         explicit Archetype(ComponentSignature signature);
         const ComponentSignature& signature() const;
         EntityLocation addEntity(const Entity& entity);
