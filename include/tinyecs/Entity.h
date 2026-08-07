@@ -10,5 +10,6 @@ namespace tinyecs
         std::uint32_t id = 0;
         std::uint32_t version = 0;
         bool isValid() const { return version != 0; }
+        bool operator==(const Entity &other) const { return id == other.id && version == other.version; }
     };
 }
