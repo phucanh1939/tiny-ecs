@@ -1,52 +1,58 @@
-#include <cassert>
-
 #include <tinyecs/Chunk.h>
 
 namespace tinyecs
 {
-    bool Chunk::full() const
+    Chunk::Chunk(const ComponentSignature& signature) : _signature(signature)
     {
-        return _entities.size() >= Chunk::Capacity;
-    }
-
-    std::uint32_t Chunk::addEntity(const Entity& entity)
-    {
-        assert(!full());
-
-        _entities.push_back(entity);
-
-        return static_cast<std::uint32_t>(_entities.size() - 1);
-    }
-
-    Entity Chunk::removeEntity(std::uint32_t index)
-    {
-        assert(index < _entities.size());
-
-        const std::uint32_t lastIndex = static_cast<std::uint32_t>(_entities.size() - 1);
-
-        if (index == lastIndex)
-        {
-            _entities.pop_back();
-            return Entity{}; // return an invalid entity since no entity was moved
-        }
-
-        Entity movedEntity = _entities[lastIndex];
-
-        _entities[index] = movedEntity;
-        _entities.pop_back();
-
-        return movedEntity;
-    }
-
-    Entity Chunk::getEntity(std::uint32_t index) const
-    {
-        assert(index < _entities.size());
-
-        return _entities[index];
     }
 
     std::size_t Chunk::entityCount() const
     {
-        return _entities.size();
+        return 0;
+    }
+
+    bool Chunk::full() const
+    {
+        return false;
+    }
+
+    Entity Chunk::getEntity(std::uint32_t index) const
+    {
+        return Entity{};
+    }
+
+    std::uint32_t Chunk::addEntity(const Entity& entity)
+    {
+        return 0;
+    }
+
+    Entity Chunk::removeEntity(std::uint32_t index)
+    {
+        return Entity{};
+    }
+
+    std::uint32_t Chunk::copyEntity(std::uint32_t sourceIndex, Chunk& destination)
+    {
+        return 0;
+    }
+
+    void* Chunk::getComponentMemory(ComponentType type, std::uint32_t index)
+    {
+        return nullptr;
+    }
+
+    const void* Chunk::getComponentMemory(ComponentType type, std::uint32_t index) const
+    {
+        return nullptr;
+    }
+
+    void* Chunk::getComponent(ComponentType type, std::uint32_t index)
+    {
+        return nullptr;
+    }
+
+    const void* Chunk::getComponent(ComponentType type, std::uint32_t index) const
+    {
+        return nullptr;
     }
 }

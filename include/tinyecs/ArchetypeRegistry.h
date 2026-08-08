@@ -1,9 +1,12 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #include <tinyecs/Archetype.h>
+#include <tinyecs/ComponentInfo.h>
 #include <tinyecs/ComponentSignature.h>
 #include <tinyecs/ComponentSignatureHash.h>
 
@@ -23,7 +26,7 @@ namespace tinyecs
 
         const Archetype* find(const ComponentSignature& signature) const;
 
-        Archetype& getOrCreate(const ComponentSignature& signature);
+        Archetype& getOrCreate(const ComponentSignature& signature, std::vector<ComponentInfo> components);
 
         Archetype& root();
 

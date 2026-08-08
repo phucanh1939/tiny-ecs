@@ -1,37 +1,47 @@
 #pragma once
 
-#include <tinyecs/ComponentSignature.h>
+#include <vector>
+
 #include <tinyecs/Chunk.h>
+#include <tinyecs/ComponentSignature.h>
 #include <tinyecs/EntityLocation.h>
 
 namespace tinyecs
 {
-    // Represents a group of entities that share the same component signature.
+    // Represents all entities that share the same component signature.
     //
-    // Every archetype is uniquely identified by its ComponentSignature.
-    // Multiple entities may belong to the same archetype, but there can only
-    // be one archetype for a given signature within a World.
-    //
-    // In later milestones, the archetype will own the chunks that store the
-    // component data for its entities.
+    // Responsibilities:
+    // - Own chunks.
+    // - Store entities and their component data.
+    // - Move entities to another archetype.
     class Archetype
     {
     public:
-        // Prevent implicit conversion from ComponentSignature to Archetype.
-        //
-        // Without explicit:
-        //     ComponentSignature signature;
-        //     Archetype archetype = signature; // Compiles, but creates Archetype implicitly.
-        //
-        // With explicit:
-        //     Archetype archetype(signature); // Must construct explicitly.
         explicit Archetype(ComponentSignature signature);
-        const ComponentSignature& signature() const;
+
+        const ComponentSignature& signature() const { return _signature; }
+
+        std::size_t entityCount() const;
+
         EntityLocation addEntity(const Entity& entity);
+
         Entity removeEntity(const EntityLocation& location);
+
+        EntityLocation copyEntity(const EntityLocation& source, Archetype& destination);
+
         Entity getEntity(const EntityLocation& location) const;
+
+        void* getComponentMemory(ComponentType type, const EntityLocation& location);
+
+        const void* getComponentMemory(ComponentType type, const EntityLocation& location) const;
+
+        void* getComponent(ComponentType type, const EntityLocation& location);
+
+        const void* getComponent(ComponentType type, const EntityLocation& location) const;
+
     private:
         ComponentSignature _signature;
+
         std::vector<Chunk> _chunks;
     };
 }

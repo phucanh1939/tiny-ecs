@@ -1,50 +1,53 @@
-#include <utility>
-
 #include <tinyecs/Archetype.h>
 
 namespace tinyecs
 {
-    Archetype::Archetype(ComponentSignature signature) : _signature(std::move(signature))
+    Archetype::Archetype(ComponentSignature signature) : _signature(signature)
     {
     }
 
-    const ComponentSignature &Archetype::signature() const
+    std::size_t Archetype::entityCount() const
     {
-        return _signature;
+        return 0;
     }
 
-    EntityLocation Archetype::addEntity(const Entity &entity)
+    EntityLocation Archetype::addEntity(const Entity& entity)
     {
-        // Find a chunk with free space.
-        for (std::uint32_t chunkIndex = 0; chunkIndex < _chunks.size(); ++chunkIndex)
-        {
-            if (_chunks[chunkIndex].full())
-            {
-                continue;
-            }
-
-            std::uint32_t entityIndex = _chunks[chunkIndex].addEntity(entity);
-
-            return EntityLocation{this, chunkIndex, entityIndex};
-        }
-
-        // No chunk has space, create a new one.
-        _chunks.emplace_back();
-
-        Chunk &chunk = _chunks.back();
-
-        std::uint32_t entityIndex = chunk.addEntity(entity);
-
-        return EntityLocation{this, static_cast<std::uint32_t>(_chunks.size() - 1), entityIndex};
+        return EntityLocation{};
     }
 
-    Entity Archetype::removeEntity(const EntityLocation &location)
+    Entity Archetype::removeEntity(const EntityLocation& location)
     {
-        return _chunks[location.chunkIndex].removeEntity(location.entityIndex);
+        return Entity{};
     }
 
-    Entity Archetype::getEntity(const EntityLocation &location) const
+    EntityLocation Archetype::copyEntity(const EntityLocation& source, Archetype& destination)
+    {
+        return EntityLocation{};
+    }
+
+    Entity Archetype::getEntity(const EntityLocation& location) const
     {
         return _chunks[location.chunkIndex].getEntity(location.entityIndex);
+    }
+
+    void* Archetype::getComponentMemory(ComponentType type, const EntityLocation& location)
+    {
+        return nullptr;
+    }
+
+    const void* Archetype::getComponentMemory(ComponentType type, const EntityLocation& location) const
+    {
+        return nullptr;
+    }
+
+    void* Archetype::getComponent(ComponentType type, const EntityLocation& location)
+    {
+        return _chunks[location.chunkIndex].getComponent(type, location.entityIndex);
+    }
+
+    const void* Archetype::getComponent(ComponentType type, const EntityLocation& location) const
+    {
+        return _chunks[location.chunkIndex].getComponent(type, location.entityIndex);
     }
 }

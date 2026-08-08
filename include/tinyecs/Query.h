@@ -1,55 +1,48 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <tuple>
+#include <vector>
+
+#include <tinyecs/Archetype.h>
+
 namespace tinyecs
 {
-    // Represents a view over entities that contain the requested component types.
-    //
-    // Query does not create or own a separate list of matching entities. Instead,
-    // it provides an interface for iterating directly over the matching entities
-    // in the World's storage.
-    //
-    // This avoids creating a temporary result list and copying matching entities
-    // every time a query is executed. This is especially important for queries
-    // that run frequently, such as once per frame.
-    //
-    // Conceptually:
-    //
-    //     List-based query:
-    //         Find entities → Create result list → Copy entities → Iterate list
-    //
-    //     Iterator-based query:
-    //         Find entities → Iterate matching entities directly
-    //
-    // For example:
-    //
-    //     Query<Position, Velocity> query;
-    //
-    //     for (Entity entity : query)
-    //     {
-    //         // Process entities that have both Position and Velocity.
-    //     }
-    //
-    // A range-based for loop requires begin() and end(). The compiler uses them
-    // to obtain an Iterator, then repeatedly:
-    //
-    //     1. Dereferences the iterator to get the current entity.
-    //     2. Advances the iterator to the next matching entity.
-    //     3. Compares the iterator with end() to determine whether iteration
-    //        is complete.
-    //
-    // The Iterator represents the current position while traversing the matching
-    // entities. The actual implementation will determine how the next matching
-    // entity is found.
-    template<typename... TComponents>
-    class Query
+template<typename... Components>
+class Query
+{
+public:
+    using Result = std::tuple<Entity, Components&...>;
+
+    class Iterator
     {
     public:
+        Iterator();
 
-        Iterator begin();
+        bool operator!=(const Iterator& other) const;
 
-        Iterator end();
+        Iterator& operator++();
+
+        Result operator*() const;
 
     private:
+        const Query* _query = nullptr;
+        std::size_t _archetypeIndex = 0;
+        std::size_t _chunkIndex = 0;
+        std::uint32_t _entityIndex = 0;
     };
+
+    explicit Query(std::vector<Archetype*> archetypes);
+
+    Iterator begin();
+    Iterator end();
+
+    std::size_t count() const;
+
+private:
+    std::vector<Archetype*> _archetypes;
+};
 }
 
+#include <tinyecs/Query.inl>

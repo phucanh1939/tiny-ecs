@@ -2,43 +2,50 @@
 
 #include <typeindex>
 #include <unordered_map>
+#include <vector>
 
 #include <tinyecs/ComponentInfo.h>
 
 namespace tinyecs
 {
-    // Stores metadata for all component types.
+    // Registers component types and their metadata.
     //
-    // Maps C++ types to ECS component information:
+    // Responsibilities:
+    // - Assign a unique ComponentType to each C++ component type.
+    // - Store metadata (size, type, etc.) for every registered component.
     //
-    //     Position
-    //        |
-    //        v
-    //     ComponentInfo
-    //          type = 0
-    //          size = sizeof(Position)
-    //
+    // Component registration is global for the entire application.
+    // The same C++ component type always maps to the same ComponentType,
+    // regardless of which World uses it.
     class ComponentRegistry
     {
     public:
         template<typename T>
-        ComponentInfo get();
+        static ComponentType getComponentType();
+
+        template<typename T>
+        static const ComponentInfo& getComponentInfo();
+
+        static const ComponentInfo& getComponentInfo(ComponentType type);
 
     private:
-        ComponentType _nextType = 0;
+        inline static ComponentType _nextType = 0;
 
-        std::unordered_map<std::type_index, ComponentInfo> _components;
+        inline static std::unordered_map<std::type_index, ComponentType> _types;
+
+        // _infos[i] is the info of Component Type i
+        inline static std::vector<ComponentInfo> _infos;
     };
 
 
     template<typename T>
-    ComponentInfo ComponentRegistry::get()
+    ComponentType ComponentRegistry::getComponentType()
     {
         const std::type_index type = std::type_index(typeid(T));
 
-        auto it = _components.find(type);
+        auto it = _types.find(type);
 
-        if (it != _components.end())
+        if (it != _types.end())
         {
             return it->second;
         }
@@ -49,8 +56,20 @@ namespace tinyecs
             .size = sizeof(T)
         };
 
-        _components[type] = info;
+        _types[type] = info.type;
+        _infos.push_back(info);
 
-        return info;
+        return info.type;
+    }
+
+    template<typename T>
+    const ComponentInfo& ComponentRegistry::getComponentInfo()
+    {
+        return getInfo(getComponentType<T>());
+    }
+
+    inline const ComponentInfo& ComponentRegistry::getComponentInfo(ComponentType type)
+    {
+        return _infos[type];
     }
 }

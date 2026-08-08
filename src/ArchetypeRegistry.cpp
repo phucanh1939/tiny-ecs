@@ -2,21 +2,26 @@
 
 namespace tinyecs
 {
-    ArchetypeRegistry::ArchetypeRegistry() : _root(nullptr)
+    ArchetypeRegistry::ArchetypeRegistry()
+        : _root(nullptr)
     {
-        Archetype& rootArchetype = getOrCreate(ComponentSignature{});
+        Archetype& rootArchetype = getOrCreate(ComponentSignature{}, {});
         _root = &rootArchetype;
     }
+
 
     Archetype* ArchetypeRegistry::find(const ComponentSignature& signature)
     {
         auto it = _archetypes.find(signature);
+
         if (it == _archetypes.end())
         {
             return nullptr;
         }
+
         return it->second.get();
     }
+
 
     const Archetype* ArchetypeRegistry::find(const ComponentSignature& signature) const
     {
@@ -31,7 +36,7 @@ namespace tinyecs
     }
 
 
-    Archetype& ArchetypeRegistry::getOrCreate(const ComponentSignature& signature)
+    Archetype& ArchetypeRegistry::getOrCreate(const ComponentSignature& signature, std::vector<ComponentInfo> components)
     {
         auto it = _archetypes.find(signature);
 

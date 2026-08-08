@@ -12,7 +12,7 @@ namespace std
     {
         std::size_t operator()(const tinyecs::ComponentSignature& signature) const
         {
-            return std::hash<std::string>()(signature.bits().to_string());
+            return std::hash<std::string>{}(signature.bits().to_string());
         }
     };
 }
