@@ -26,8 +26,6 @@ namespace tinyecs
             bool operator!=(const Iterator& other) const;
 
         private:
-            void skipToNextSetBit();
-
             const std::bitset<MaxComponentTypes>& _bits;
 
             ComponentType _current;

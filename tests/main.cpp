@@ -1,21 +1,14 @@
 #include <cassert>
 #include <iostream>
 
-#include <tinyecs/ArchetypeRegistry.h>
-#include <tinyecs/ComponentSignature.h>
-#include <tinyecs/ComponentRegistry.h>
-#include <tinyecs/ComponentType.h>
+#include "ComponentSignatureTest.h"
 
-using namespace tinyecs;
-
-void printPassed(const char* testName)
-{
-    std::cout << "\033[32m✓ " << testName << " passed\033[0m\n";
-}
+using namespace tinyecs::test;
 
 int main()
 {
+    ComponentSignatureTest::run();
     std::cout << "\033[32m✓ All tests passed\033[0m\n";
-
     return 0;
 }
+

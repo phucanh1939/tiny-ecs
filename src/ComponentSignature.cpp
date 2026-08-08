@@ -7,36 +7,36 @@ namespace tinyecs
     ComponentSignature::Iterator::Iterator(const std::bitset<MaxComponentTypes> &bits, ComponentType current)
         : _bits(bits), _current(current)
     {
-        assert(false && "Not implemented");
     }
 
     ComponentType ComponentSignature::Iterator::operator*() const
     {
-        assert(false && "Not implemented");
-        return 0;
+        return _current;
     }
 
     ComponentSignature::Iterator &ComponentSignature::Iterator::operator++()
     {
-        assert(false && "Not implemented");
+        ++_current;
+
+        // Find the index of the next set bit in the bitmask 
+        while (_current < MaxComponentTypes && !_bits[_current])
+        {
+            ++_current;
+        }
+
         return *this;
     }
 
     bool ComponentSignature::Iterator::operator==(const Iterator &other) const
     {
-        assert(false && "Not implemented");
-        return false;
+        // 2 iterator consider equals when they point to the same bit of the same signature
+        return &_bits == &other._bits && _current == other._current;
     }
 
     bool ComponentSignature::Iterator::operator!=(const Iterator &other) const
     {
-        assert(false && "Not implemented");
-        return false;
-    }
-
-    void ComponentSignature::Iterator::skipToNextSetBit()
-    {
-        assert(false && "Not implemented");
+        // reuse the == operator
+        return !(*this == other);
     }
 
     void ComponentSignature::add(ComponentType componentType)
@@ -71,13 +71,21 @@ namespace tinyecs
 
     ComponentSignature::Iterator ComponentSignature::begin() const
     {
-        assert(false && "Not implemented");
-        return Iterator(_bits, 0);
+        ComponentType current = 0;
+
+        // Find the index of the first set bit in the mask as the begin iterator
+        while (current < MaxComponentTypes && !_bits[current])
+        {
+            ++current;
+        }
+
+        return Iterator(_bits, current);
     }
 
     ComponentSignature::Iterator ComponentSignature::end() const
     {
-        assert(false && "Not implemented");
+        // Iterator ++ operator implement allow the _current to reach MaxComponentTypes after the last set bit
+        // So end() iterator at the MaxComponentTypes will matched that _current iterator
         return Iterator(_bits, MaxComponentTypes);
     }
 
