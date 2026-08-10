@@ -3,6 +3,7 @@
 
 #include "ComponentSignatureTest.h"
 #include "ComponentRegistryTest.h"
+#include "ComponentColumnTest.h"
 
 using namespace tinyecs::test;
 
@@ -10,6 +11,7 @@ int main()
 {
     ComponentSignatureTest::run();
     ComponentRegistryTest::run();
+    ComponentColumnTest::run();
     std::cout << "\033[32m✓ All tests passed\033[0m\n";
     return 0;
 }

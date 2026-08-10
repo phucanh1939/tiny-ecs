@@ -28,9 +28,8 @@ namespace tinyecs
         /// @return pointer to component data of an entity at the index
         const void* get(std::uint32_t index) const;
 
-
         /// @brief Add an empty slot for one entity (at the end of _data)
-        /// @return 
+        /// @return the index of added slot
         std::uint32_t add();
 
         /// @brief Remove component data at index using swap-back
