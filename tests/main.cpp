@@ -5,6 +5,7 @@
 #include "ComponentRegistryTest.h"
 #include "ComponentColumnTest.h"
 #include "ChunkTest.h"
+#include "ArchetypeTest.h"
 
 using namespace tinyecs::test;
 
@@ -14,6 +15,7 @@ int main()
     ComponentRegistryTest::run();
     ComponentColumnTest::run();
     ChunkTest::run();
+    ArchetypeTest::run();
     std::cout << "\033[32m✓ All tests passed\033[0m\n";
     return 0;
 }

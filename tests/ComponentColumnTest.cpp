@@ -1,9 +1,10 @@
+#include "ComponentColumnTest.h"
+
 #include <cassert>
 #include <cstring>
 
 #include <tinyecs/ComponentColumn.h>
 
-#include "ComponentColumnTest.h"
 #include "TestUtils.h"
 
 namespace tinyecs::test

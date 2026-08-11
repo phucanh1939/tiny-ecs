@@ -1,10 +1,11 @@
+#include "ChunkTest.h"
+
 #include <cassert>
 #include <cstring>
 
 #include <tinyecs/Chunk.h>
 #include <tinyecs/ComponentRegistry.h>
 
-#include "ChunkTest.h"
 #include "TestUtils.h"
 
 namespace tinyecs::test

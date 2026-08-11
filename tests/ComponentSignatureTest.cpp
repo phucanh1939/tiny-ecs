@@ -1,9 +1,10 @@
+#include "ComponentSignatureTest.h"
+
 #include <cassert>
 #include <iostream>
 
 #include <tinyecs/ComponentSignature.h>
 
-#include "ComponentSignatureTest.h"
 #include "TestUtils.h"
 
 namespace tinyecs::test

@@ -1,8 +1,9 @@
+#include "ComponentRegistryTest.h"
+
 #include <cassert>
 
 #include <tinyecs/ComponentRegistry.h>
 
-#include "ComponentRegistryTest.h"
 #include "TestUtils.h"
 
 namespace tinyecs::test
