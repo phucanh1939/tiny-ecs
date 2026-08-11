@@ -22,11 +22,21 @@ namespace tinyecs
     public:
         ArchetypeRegistry();
 
+        /// @brief Find archetype by signature
+        /// @param signature 
+        /// @return Archetype matched that signature, otherwise return nullptr
         Archetype* find(const ComponentSignature& signature);
 
+        /// @brief Find archetype by signature
+        /// @param signature 
+        /// @return Archetype matched that signature, otherwise return nullptr
         const Archetype* find(const ComponentSignature& signature) const;
 
-        Archetype& getOrCreate(const ComponentSignature& signature, std::vector<ComponentInfo> components);
+        /// @brief Get or create archetype from a signature
+        /// @param signature 
+        /// @param components DO WE EVEN NEED THIS??
+        /// @return Archetype matched that signature
+        Archetype& getOrCreate(const ComponentSignature& signature);
 
         Archetype& root();
 

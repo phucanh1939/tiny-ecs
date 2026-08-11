@@ -46,7 +46,7 @@ namespace tinyecs::test
 
         assert(first == second);
 
-        printPassed("ComponentRegistry same type");
+        printPassed("ComponentRegistry::same type");
     }
 
     void ComponentRegistryTest::testDifferentTypesReturnDifferentComponentTypes()
@@ -59,7 +59,7 @@ namespace tinyecs::test
         assert(position != health);
         assert(velocity != health);
 
-        printPassed("ComponentRegistry different types");
+        printPassed("ComponentRegistry::different types");
     }
 
     void ComponentRegistryTest::testGetComponentInfoByType()
@@ -71,7 +71,7 @@ namespace tinyecs::test
         assert(info.type == type);
         assert(info.size == sizeof(Position));
 
-        printPassed("ComponentRegistry getComponentInfo<T>");
+        printPassed("ComponentRegistry::getComponentInfo<T>");
     }
 
     void ComponentRegistryTest::testGetComponentInfoByComponentType()
@@ -82,6 +82,6 @@ namespace tinyecs::test
 
         assert(info.type == type);
 
-        printPassed("ComponentRegistry getComponentInfo(ComponentType)");
+        printPassed("ComponentRegistry::getComponentInfo(ComponentType)");
     }
 }

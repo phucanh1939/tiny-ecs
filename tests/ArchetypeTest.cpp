@@ -51,6 +51,8 @@ namespace tinyecs::test
 
         assert(archetype.entityCount() == 1);
         assert(archetype.getEntity(location) == entity);
+
+        printPassed("Archetype::add entity");
     }
 
     void ArchetypeTest::testRemoveEntityLast()
@@ -74,6 +76,8 @@ namespace tinyecs::test
         assert(archetype.entityCount() == 2);
         assert(archetype.getEntity(firstLocation) == first);
         assert(archetype.getEntity(secondLocation) == second);
+
+        printPassed("Archetype::remove last entity");
     }
 
     void ArchetypeTest::testRemoveSwapback()
@@ -93,9 +97,10 @@ namespace tinyecs::test
 
         assert(moved == third);
         assert(archetype.entityCount() == 2);
-
         assert(archetype.getEntity(firstLocation) == first);
         assert(archetype.getEntity(secondLocation) == third);
+
+        printPassed("Archetype::remove swap-back");
     }
 
     void ArchetypeTest::testCopyEntity()
@@ -124,9 +129,11 @@ namespace tinyecs::test
         EntityLocation secondLocation = source.addEntity(second);
         EntityLocation thirdLocation = source.addEntity(third);
 
-        auto *sourcePosition = static_cast<Position *>(source.getComponent(positionType, secondLocation));
+        auto* sourcePosition = static_cast<Position*>(
+            source.getComponent(positionType, secondLocation));
 
-        auto *sourceVelocity = static_cast<Velocity *>(source.getComponent(velocityType, secondLocation));
+        auto* sourceVelocity = static_cast<Velocity*>(
+            source.getComponent(velocityType, secondLocation));
 
         sourcePosition->x = 10.0f;
         sourcePosition->y = 20.0f;
@@ -134,18 +141,20 @@ namespace tinyecs::test
         sourceVelocity->x = 1.0f;
         sourceVelocity->y = 2.0f;
 
-        EntityLocation destinationLocation = source.copyEntity(secondLocation, destination);
+        EntityLocation destinationLocation =
+            source.copyEntity(secondLocation, destination);
 
         assert(destination.entityCount() == 1);
         assert(destination.getEntity(destinationLocation) == second);
 
-        auto *destinationPosition =
-            static_cast<Position *>(destination.getComponent(positionType, destinationLocation));
+        auto* destinationPosition = static_cast<Position*>(
+            destination.getComponent(positionType, destinationLocation));
 
-        auto *destinationVelocity =
-            static_cast<Velocity *>(destination.getComponent(velocityType, destinationLocation));
+        auto* destinationVelocity = static_cast<Velocity*>(
+            destination.getComponent(velocityType, destinationLocation));
 
-        auto *destinationHealth = destination.getComponent(healthType, destinationLocation);
+        auto* destinationHealth =
+            destination.getComponent(healthType, destinationLocation);
 
         assert(destinationPosition != nullptr);
         assert(destinationVelocity != nullptr);
@@ -160,6 +169,8 @@ namespace tinyecs::test
         destinationPosition->x = 100.0f;
 
         assert(sourcePosition->x == 10.0f);
+
+        printPassed("Archetype::copy entity");
     }
 
     void ArchetypeTest::testGetEntity()
@@ -178,11 +189,14 @@ namespace tinyecs::test
         Entity result = archetype.getEntity(secondLocation);
 
         assert(result == second);
+
+        printPassed("Archetype::get entity");
     }
 
     void ArchetypeTest::testGetComponent()
     {
-        const ComponentType positionType = ComponentRegistry::getComponentType<Position>();
+        const ComponentType positionType =
+            ComponentRegistry::getComponentType<Position>();
 
         ComponentSignature signature;
         signature.add(positionType);
@@ -195,9 +209,11 @@ namespace tinyecs::test
         EntityLocation firstLocation = archetype.addEntity(first);
         EntityLocation secondLocation = archetype.addEntity(second);
 
-        auto *firstPosition = static_cast<Position *>(archetype.getComponent(positionType, firstLocation));
+        auto* firstPosition = static_cast<Position*>(
+            archetype.getComponent(positionType, firstLocation));
 
-        auto *secondPosition = static_cast<Position *>(archetype.getComponent(positionType, secondLocation));
+        auto* secondPosition = static_cast<Position*>(
+            archetype.getComponent(positionType, secondLocation));
 
         firstPosition->x = 10.0f;
         firstPosition->y = 20.0f;
@@ -205,19 +221,23 @@ namespace tinyecs::test
         secondPosition->x = 30.0f;
         secondPosition->y = 40.0f;
 
-        // Get component data of 1 entity
-        auto *result = static_cast<Position *>(archetype.getComponent(positionType, firstLocation));
+        auto* result = static_cast<Position*>(
+            archetype.getComponent(positionType, firstLocation));
 
-        // Compare
         assert(result != nullptr);
         assert(result->x == 10.0f);
         assert(result->y == 20.0f);
+
+        printPassed("Archetype::get component");
     }
 
     void ArchetypeTest::testInvalidComponent()
     {
-        const ComponentType positionType = ComponentRegistry::getComponentType<Position>();
-        const ComponentType velocityType = ComponentRegistry::getComponentType<Velocity>();
+        const ComponentType positionType =
+            ComponentRegistry::getComponentType<Position>();
+
+        const ComponentType velocityType =
+            ComponentRegistry::getComponentType<Velocity>();
 
         ComponentSignature signature;
         signature.add(positionType);
@@ -227,8 +247,10 @@ namespace tinyecs::test
         Entity entity{1, 0};
         EntityLocation location = archetype.addEntity(entity);
 
-        void *result = archetype.getComponent(velocityType, location);
+        void* result = archetype.getComponent(velocityType, location);
 
         assert(result == nullptr);
+
+        printPassed("Archetype::invalid component");
     }
 }

@@ -124,7 +124,7 @@ namespace tinyecs::test
 
         assert(index == 3);
 
-        printPassed("ComponentSignature range-based for");
+        printPassed("ComponentSignature::range-based for");
     }
 
     void ComponentSignatureTest::testEmptyIterator()
@@ -143,6 +143,6 @@ namespace tinyecs::test
 
         assert(count == 0);
 
-        printPassed("ComponentSignature empty iterator");
+        printPassed("ComponentSignature::empty iterator");
     }
 }

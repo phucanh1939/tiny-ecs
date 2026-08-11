@@ -65,7 +65,7 @@ namespace tinyecs::test
         assert(chunk.entityCount() == 0);
         assert(!chunk.full());
 
-        printPassed("Chunk empty");
+        printPassed("Chunk::empty");
     }
 
     void ChunkTest::testAddEntity()
@@ -101,7 +101,7 @@ namespace tinyecs::test
         assert(index == Chunk::InvalidIndex);
         assert(chunk.entityCount() == Chunk::Capacity);
 
-        printPassed("Chunk full");
+        printPassed("Chunk::full");
     }
 
     void ChunkTest::testGetEntity()
