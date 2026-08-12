@@ -30,21 +30,57 @@ namespace tinyecs
         World(World &&) noexcept = default;
         World &operator=(World &&) noexcept = default;
 
+        /// @brief Create an empty entity
+        /// @return Created entity
         Entity createEntity();
         
+        /// @brief Remove an entity & its components
+        /// @param entity 
         void destroyEntity(Entity entity);
         
+        /// @brief Check if an entity is valid or not
+        /// @param entity 
+        /// @return True if entity version is matched with latest version for entity.id
         bool isValid(Entity entity) const;
 
-        template <typename T>
-        T &getComponent(Entity entity);
-
-        template <typename T>
-        const T &getComponent(Entity entity) const;
-
+        /// @brief Add a component to an entity
+        /// @tparam T Component Type
+        /// @param entity 
+        /// @param component 
         template <typename T>
         void addComponent(Entity entity, const T &component);
 
+        /// @brief Get component data from an entity
+        /// @tparam T Component type
+        /// @param entity 
+        /// @return Component data
+        template <typename T>
+        T &getComponent(Entity entity);
+
+        /// @brief Get component data from an entity
+        /// @tparam T Component type
+        /// @param entity 
+        /// @return Component data
+        template <typename T>
+        const T &getComponent(Entity entity) const;
+
+        /// @brief Try Get component data from an entity
+        /// @tparam T Component type
+        /// @param entity 
+        /// @return Component data pointer or null if component T not existed in entity
+        template <typename T>
+        T* tryGetComponent(Entity entity);
+        
+        /// @brief Try Get component data from an entity
+        /// @tparam T Component type
+        /// @param entity 
+        /// @return Component data pointer or null if component T not existed in entity
+        template <typename T>
+        const T* tryGetComponent(Entity entity) const;
+
+        /// @brief Remove a component from the entity
+        /// @tparam T Component Type
+        /// @param entity 
         template <typename T>
         void removeComponent(Entity entity);
 
