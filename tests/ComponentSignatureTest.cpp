@@ -18,6 +18,7 @@ namespace tinyecs::test
         testIterator();
         testRangeBasedFor();
         testEmptyIterator();
+        testContainsAll();
     }
 
     void ComponentSignatureTest::testAdd()
@@ -144,5 +145,32 @@ namespace tinyecs::test
         assert(count == 0);
 
         printPassed("ComponentSignature::empty iterator");
+    }
+
+    void ComponentSignatureTest::testContainsAll()
+    {
+        ComponentSignature signature;
+        ComponentSignature required;
+
+        assert(signature.containsAll(required));
+        assert(required.containsAll(signature));
+
+        signature.add(1);
+        signature.add(2);
+        signature.add(3);
+
+        required.add(1);
+        required.add(2);
+
+        assert(signature.containsAll(required));
+        assert(!required.containsAll(signature));
+
+        required.add(3);
+        assert(signature.containsAll(required));
+
+        required.add(4);
+        assert(!signature.containsAll(required));
+
+        printPassed("ComponentSignature::containsAll");
     }
 }

@@ -84,6 +84,9 @@ namespace tinyecs
         template <typename T>
         void removeComponent(Entity entity);
 
+        /// @brief Query to iterator through matched entity and components
+        /// @tparam ...Components 
+        /// @return 
         template<typename... Components>
         Query<Components...> query();
 

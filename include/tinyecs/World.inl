@@ -127,6 +127,8 @@ namespace tinyecs
     template <typename... Components>
     Query<Components...> World::query()
     {
-        assert(false && "Not implemented");
+        ComponentSignature requiredSignature;
+        (requiredSignature.add(ComponentRegistry::getComponentType<Components>()), ...);
+        return Query<Components...>(_archetypeRegistry.getMatchedArchetypes(requiredSignature));
     }
 }

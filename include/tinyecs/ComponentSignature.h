@@ -39,6 +39,8 @@ namespace tinyecs
 
         bool contains(ComponentType type) const;
 
+        bool containsAll(const ComponentSignature& other) const;
+
         bool empty() const;
 
         bool operator==(const ComponentSignature& other) const;

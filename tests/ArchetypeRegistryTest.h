@@ -12,5 +12,6 @@ namespace tinyecs::test
         static void testRoot();
         static void testFind();
         static void testGetOrCreate();
+        static void testGetMatchedArchetypes();
     };
 }

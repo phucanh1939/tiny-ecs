@@ -12,5 +12,6 @@ namespace tinyecs::test
         static void testDestroyEntity();
         static void testAddAndGetComponent();
         static void testRemoveComponent();
+        static void testQuery();
     };
 }

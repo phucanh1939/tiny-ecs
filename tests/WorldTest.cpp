@@ -34,6 +34,7 @@ namespace tinyecs::test
         testDestroyEntity();
         testAddAndGetComponent();
         testRemoveComponent();
+        testQuery();
     }
 
     void WorldTest::testCreateEntity()
@@ -44,22 +45,18 @@ namespace tinyecs::test
         Entity second = world.createEntity();
         Entity third = world.createEntity();
 
-        // Entities should be valid.
         assert(first.isValid());
         assert(second.isValid());
         assert(third.isValid());
 
-        // IDs should be unique and sequential for new entities.
         assert(first.id == 0);
         assert(second.id == 1);
         assert(third.id == 2);
 
-        // Newly created entities should have the initial version.
         assert(first.version == 1);
         assert(second.version == 1);
         assert(third.version == 1);
 
-        // World should recognize the created entities as valid.
         assert(world.isValid(first));
         assert(world.isValid(second));
         assert(world.isValid(third));
@@ -79,17 +76,12 @@ namespace tinyecs::test
         assert(world.isValid(second));
         assert(world.isValid(third));
 
-        // Destroy the middle entity.
         world.destroyEntity(second);
 
-        // Destroyed entity is no longer valid.
         assert(!world.isValid(second));
-
-        // Other entities remain valid.
         assert(world.isValid(first));
         assert(world.isValid(third));
 
-        // The ID should be reusable.
         Entity reused = world.createEntity();
 
         assert(reused.id == second.id);
@@ -145,5 +137,55 @@ namespace tinyecs::test
         assert(world.isValid(entity));
 
         printPassed("World::remove component");
+    }
+
+    void WorldTest::testQuery()
+    {
+        World world;
+
+        Entity positionOnly = world.createEntity();
+        Entity positionVelocity = world.createEntity();
+        Entity velocityOnly = world.createEntity();
+
+        world.addComponent(positionOnly, Position{10.0f, 20.0f});
+
+        world.addComponent(positionVelocity, Position{30.0f, 40.0f});
+        world.addComponent(positionVelocity, Velocity{3.0f, 4.0f});
+
+        world.addComponent(velocityOnly, Velocity{5.0f, 6.0f});
+
+        auto query = world.query<Position, Velocity>();
+
+        std::size_t count = 0;
+
+        for (auto it = query.begin(); it != query.end(); ++it)
+        {
+            auto [entity, position, velocity] = *it;
+
+            assert(entity == positionVelocity);
+            assert(position.x == 30.0f);
+            assert(position.y == 40.0f);
+            assert(velocity.x == 3.0f);
+            assert(velocity.y == 4.0f);
+
+            ++count;
+        }
+        assert(count == 1);
+
+        count = 0;
+        for (auto [entity, position, velocity] : query)
+        {
+            assert(entity == positionVelocity);
+            assert(position.x == 30.0f);
+            assert(position.y == 40.0f);
+            assert(velocity.x == 3.0f);
+            assert(velocity.y == 4.0f);
+
+            ++count;
+        }
+
+        assert(count == 1);
+
+        printPassed("World::query");
     }
 }

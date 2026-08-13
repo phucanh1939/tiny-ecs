@@ -38,6 +38,11 @@ namespace tinyecs
         /// @return Archetype matched that signature
         Archetype& getOrCreate(const ComponentSignature& signature);
 
+        /// @brief Get matched archetypes for a signature
+        /// @param requiredSignature 
+        /// @return 
+        std::vector<Archetype*> getMatchedArchetypes(const ComponentSignature& requiredSignature) const;
+
         Archetype& root();
 
         const Archetype& root() const;

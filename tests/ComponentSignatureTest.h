@@ -15,5 +15,6 @@ namespace tinyecs::test
         static void testIterator();
         static void testRangeBasedFor();
         static void testEmptyIterator();
+        static void testContainsAll();
     };
 }

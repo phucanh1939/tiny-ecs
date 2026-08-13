@@ -18,7 +18,7 @@ namespace tinyecs
     {
         ++_current;
 
-        // Find the index of the next set bit in the bitmask 
+        // Find the index of the next set bit in the bitmask
         while (_current < MaxComponentTypes && !_bits[_current])
         {
             ++_current;
@@ -52,6 +52,11 @@ namespace tinyecs
     bool ComponentSignature::contains(ComponentType componentType) const
     {
         return _bits.test(componentType);
+    }
+
+    bool ComponentSignature::containsAll(const ComponentSignature &other) const
+    {
+        return (_bits & other._bits) == other._bits;
     }
 
     bool ComponentSignature::empty() const
