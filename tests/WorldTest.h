@@ -10,7 +10,6 @@ namespace tinyecs::test
     private:
         static void testCreateEntity();
         static void testDestroyEntity();
-        static void testAddComponent();
         static void testAddAndGetComponent();
         static void testRemoveComponent();
     };

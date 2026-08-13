@@ -17,6 +17,8 @@ namespace tinyecs
         const ComponentSignature& signature() const { return _signature; }
 
         std::size_t entityCount() const;
+        std::size_t chunkCount() const;
+        std::size_t chunkEntityCount(std::uint32_t chunkIndex) const;
 
         /// @brief Add an entity to a chunk (one of chunks), return the location, component data will be empty slot
         /// @param entity 

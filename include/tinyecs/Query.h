@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <tinyecs/Archetype.h>
+#include <tinyecs/Entity.h>
 
 namespace tinyecs
 {
@@ -17,16 +18,15 @@ public:
 
     class Iterator
     {
+        friend class Query;
     public:
-        Iterator();
-
         bool operator!=(const Iterator& other) const;
-
+        bool operator==(const Iterator& other) const;
         Iterator& operator++();
-
         Result operator*() const;
 
     private:
+        Iterator(const Query* query, std::size_t archetypeIndex, std::size_t chunkIndex, std::uint32_t entityIndex);
         const Query* _query = nullptr;
         std::size_t _archetypeIndex = 0;
         std::size_t _chunkIndex = 0;
@@ -38,9 +38,8 @@ public:
     Iterator begin();
     Iterator end();
 
-    std::size_t count() const;
-
 private:
+    // Non-owning pointers to matching archetypes owned by the World.
     std::vector<Archetype*> _archetypes;
 };
 }

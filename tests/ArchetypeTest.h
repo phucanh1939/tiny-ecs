@@ -15,5 +15,7 @@ namespace tinyecs::test
         static void testGetEntity();
         static void testGetComponent();
         static void testInvalidComponent();
+        static void testChunkCount();
+        static void testChunkEntityCount();
     };
 }

@@ -38,6 +38,8 @@ namespace tinyecs::test
         testGetEntity();
         testGetComponent();
         testInvalidComponent();
+        testChunkCount();
+        testChunkEntityCount();
     }
 
     void ArchetypeTest::testAddEntity()
@@ -129,10 +131,10 @@ namespace tinyecs::test
         EntityLocation secondLocation = source.addEntity(second);
         EntityLocation thirdLocation = source.addEntity(third);
 
-        auto* sourcePosition = static_cast<Position*>(
+        auto *sourcePosition = static_cast<Position *>(
             source.getComponent(positionType, secondLocation));
 
-        auto* sourceVelocity = static_cast<Velocity*>(
+        auto *sourceVelocity = static_cast<Velocity *>(
             source.getComponent(velocityType, secondLocation));
 
         sourcePosition->x = 10.0f;
@@ -147,13 +149,13 @@ namespace tinyecs::test
         assert(destination.entityCount() == 1);
         assert(destination.getEntity(destinationLocation) == second);
 
-        auto* destinationPosition = static_cast<Position*>(
+        auto *destinationPosition = static_cast<Position *>(
             destination.getComponent(positionType, destinationLocation));
 
-        auto* destinationVelocity = static_cast<Velocity*>(
+        auto *destinationVelocity = static_cast<Velocity *>(
             destination.getComponent(velocityType, destinationLocation));
 
-        auto* destinationHealth =
+        auto *destinationHealth =
             destination.getComponent(healthType, destinationLocation);
 
         assert(destinationPosition != nullptr);
@@ -209,10 +211,10 @@ namespace tinyecs::test
         EntityLocation firstLocation = archetype.addEntity(first);
         EntityLocation secondLocation = archetype.addEntity(second);
 
-        auto* firstPosition = static_cast<Position*>(
+        auto *firstPosition = static_cast<Position *>(
             archetype.getComponent(positionType, firstLocation));
 
-        auto* secondPosition = static_cast<Position*>(
+        auto *secondPosition = static_cast<Position *>(
             archetype.getComponent(positionType, secondLocation));
 
         firstPosition->x = 10.0f;
@@ -221,7 +223,7 @@ namespace tinyecs::test
         secondPosition->x = 30.0f;
         secondPosition->y = 40.0f;
 
-        auto* result = static_cast<Position*>(
+        auto *result = static_cast<Position *>(
             archetype.getComponent(positionType, firstLocation));
 
         assert(result != nullptr);
@@ -247,10 +249,44 @@ namespace tinyecs::test
         Entity entity{1, 0};
         EntityLocation location = archetype.addEntity(entity);
 
-        void* result = archetype.getComponent(velocityType, location);
+        void *result = archetype.getComponent(velocityType, location);
 
         assert(result == nullptr);
 
         printPassed("Archetype::invalid component");
+    }
+
+    void ArchetypeTest::testChunkCount()
+    {
+        ComponentSignature signature;
+        Archetype archetype(signature);
+
+        assert(archetype.chunkCount() == 0);
+
+        Entity entity{1, 0};
+        archetype.addEntity(entity);
+
+        assert(archetype.chunkCount() == 1);
+
+        printPassed("Archetype::chunk count");
+    }
+
+    void ArchetypeTest::testChunkEntityCount()
+    {
+        ComponentSignature signature;
+        Archetype archetype(signature);
+
+        assert(archetype.chunkCount() == 0);
+
+        Entity first{1, 0};
+        Entity second{2, 0};
+
+        archetype.addEntity(first);
+        archetype.addEntity(second);
+
+        assert(archetype.chunkCount() == 1);
+        assert(archetype.chunkEntityCount(0) == 2);
+
+        printPassed("Archetype::chunk entity count");
     }
 }

@@ -1,4 +1,5 @@
 #include <tinyecs/Archetype.h>
+#include <cassert>
 
 namespace tinyecs
 {
@@ -16,6 +17,17 @@ namespace tinyecs
         return count;
     }
 
+    std::size_t Archetype::chunkCount() const
+    {
+        return _chunks.size();
+    }
+
+    std::size_t Archetype::chunkEntityCount(std::uint32_t chunkIndex) const
+    {
+        assert(chunkIndex < _chunks.size());
+        return _chunks[chunkIndex].entityCount();
+    }
+
     EntityLocation Archetype::addEntity(const Entity &entity)
     {
         std::uint32_t chunkIndex = findOrCreateChunk();
@@ -24,8 +36,7 @@ namespace tinyecs
         return EntityLocation{
             .archetype = this,
             .chunkIndex = chunkIndex,
-            .entityIndex = entityIndex
-        };
+            .entityIndex = entityIndex};
     }
 
     Entity Archetype::removeEntity(const EntityLocation &location)
