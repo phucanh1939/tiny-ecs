@@ -1,152 +1,138 @@
-#include <cassert>
 #include <tinyecs/Chunk.h>
-#include <tinyecs/ComponentRegistry.h>
+
+#include <cassert>
+#include <iostream>
+#include <cstring>
 
 namespace tinyecs
 {
-    Chunk::Chunk(const ComponentSignature &signature) : _signature(signature)
+    Chunk::Chunk(const std::vector<ColumnLayout>& layouts, std::size_t capacity)
+        : _layouts(&layouts), _data(std::make_unique<std::byte[]>(Size)), _capacity(capacity)
     {
-        _entities.reserve(Capacity);
-        for (ComponentType type : _signature)
-        {
-            _columns.emplace_back(ComponentRegistry::getComponentInfo(type));
-        }
+
     }
 
     std::size_t Chunk::entityCount() const
     {
-        return _entities.size();
+        return _entityCount;
     }
 
     bool Chunk::full() const
     {
-        return entityCount() >= Chunk::Capacity;
+        return _entityCount >= _capacity;
     }
 
     Entity Chunk::getEntity(std::uint32_t index) const
     {
-        assert(index < _entities.size());
-        return _entities[index];
+        assert(index < _entityCount);
+
+        const auto* entities = reinterpret_cast<const Entity*>(_data.get());
+        return entities[index];
     }
 
-    std::uint32_t Chunk::addEntity(const Entity &entity)
+    std::uint32_t Chunk::addEntity(const Entity& entity)
     {
         if (full())
-            return Chunk::InvalidIndex;
+            return InvalidIndex;
 
-        _entities.push_back(entity);
+        auto* entities = reinterpret_cast<Entity*>(_data.get());
+        const std::uint32_t index = static_cast<std::uint32_t>(_entityCount);
 
-        for (ComponentColumn &column : _columns)
-        {
-            column.add();
-        }
+        entities[index] = entity;
+        ++_entityCount;
 
-        return _entities.size() - 1;
+        return index;
     }
 
     Entity Chunk::removeEntity(std::uint32_t index)
     {
-        assert(index < _entities.size());
+        assert(index < _entityCount);
 
-        const std::uint32_t lastIndex = static_cast<std::uint32_t>(_entities.size() - 1);
+        auto* entities = reinterpret_cast<Entity*>(_data.get());
+        const std::uint32_t lastIndex = static_cast<std::uint32_t>(_entityCount - 1);
 
-        Entity movedEntity{};
+        Entity moved = Entity{};
 
         if (index != lastIndex)
         {
-            movedEntity = _entities[lastIndex];
-            _entities[index] = movedEntity;
+            moved = entities[lastIndex];
+            entities[index] = moved;
         }
 
-        _entities.pop_back();
+        --_entityCount;
 
-        for (ComponentColumn &column : _columns)
-        {
-            column.remove(index);
-        }
-
-        return movedEntity;
+        return moved;
     }
 
-    std::uint32_t Chunk::copyEntity(std::uint32_t sourceIndex, Chunk &destination)
+    std::uint32_t Chunk::copyEntity(std::uint32_t sourceIndex, Chunk& destination)
     {
-        assert(sourceIndex < entityCount());
+        assert(sourceIndex < _entityCount);
 
-        // Copy entity
-        const std::uint32_t destinationIndex = destination.addEntity(_entities[sourceIndex]);
+        const std::uint32_t destinationIndex = destination.addEntity(getEntity(sourceIndex));
 
-        // Add failed? dest chunk full?
-        if (destinationIndex == Chunk::InvalidIndex)
+        if (destinationIndex == InvalidIndex)
+            return InvalidIndex;
+
+        for (const ColumnLayout& sourceLayout : *_layouts)
         {
-            return Chunk::InvalidIndex;
-        }
+            const ColumnLayout* destinationLayout = destination.findColumnLayout(sourceLayout.type);
 
-        // Copy shared components
-        for (ComponentType type : _signature)
-        {
-            if (!destination._signature.contains(type))
-            {
+            if (destinationLayout == nullptr)
                 continue;
-            }
 
-            const void *source = getComponent(type, sourceIndex);
-            assert(source != nullptr);
-            void *target = destination.getComponent(type, destinationIndex);
-            assert(target != nullptr);
-            const ComponentInfo &info = ComponentRegistry::getComponentInfo(type); // Already has component column, has the type info already, no need to look up it here
-            std::memcpy(target, source, info.size);
+            const void* source = static_cast<const std::byte*>(getColumnData(sourceLayout)) + sourceIndex * sourceLayout.elementSize;
+            void* target = static_cast<std::byte*>(destination.getColumnData(*destinationLayout)) + destinationIndex * destinationLayout->elementSize;
+
+            std::memcpy(target, source, sourceLayout.elementSize);
         }
 
         return destinationIndex;
     }
 
-    void *Chunk::getComponent(ComponentType type, std::uint32_t index)
+    void* Chunk::getComponent(ComponentType type, std::uint32_t index)
     {
-        ComponentColumn *column = getColumn(type);
+        assert(index < _entityCount);
 
-        if (column == nullptr)
+        const ColumnLayout* layout = findColumnLayout(type);
+
+        if (layout == nullptr)
         {
             return nullptr;
         }
 
-        return column->get(index);
+        return static_cast<std::byte*>(getColumnData(*layout)) + index * layout->elementSize;
     }
 
-    const void *Chunk::getComponent(ComponentType type, std::uint32_t index) const
+    const void* Chunk::getComponent(ComponentType type, std::uint32_t index) const
     {
-        const ComponentColumn *column = getColumn(type);
+        assert(index < _entityCount);
 
-        if (column == nullptr)
-        {
+        const ColumnLayout* layout = findColumnLayout(type);
+
+        if (layout == nullptr)
             return nullptr;
-        }
 
-        return column->get(index);
+        return static_cast<const std::byte*>(getColumnData(*layout)) + index * layout->elementSize;
     }
 
-    ComponentColumn *Chunk::getColumn(ComponentType type)
+    const ColumnLayout* Chunk::findColumnLayout(ComponentType type) const
     {
-        for (ComponentColumn &column : _columns)
+        for (const ColumnLayout& layout : *_layouts)
         {
-            if (column.type() == type)
-            {
-                return &column;
-            }
+            if (layout.type == type)
+                return &layout;
         }
 
         return nullptr;
     }
 
-    const ComponentColumn *Chunk::getColumn(ComponentType type) const
+    void* Chunk::getColumnData(const ColumnLayout& layout)
     {
-        for (const ComponentColumn &column : _columns)
-        {
-            if (column.type() == type)
-            {
-                return &column;
-            }
-        }
+        return _data.get() + layout.offset;
+    }
 
-        return nullptr;
+    const void* Chunk::getColumnData(const ColumnLayout& layout) const
+    {
+        return _data.get() + layout.offset;
     }
 }

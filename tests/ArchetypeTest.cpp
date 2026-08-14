@@ -137,6 +137,9 @@ namespace tinyecs::test
         auto *sourceVelocity = static_cast<Velocity *>(
             source.getComponent(velocityType, secondLocation));
 
+        assert(sourcePosition != nullptr);
+        assert(sourceVelocity != nullptr);
+
         sourcePosition->x = 10.0f;
         sourcePosition->y = 20.0f;
 

@@ -1,10 +1,15 @@
 #include <tinyecs/Archetype.h>
+
 #include <cassert>
+
+#include <tinyecs/ComponentRegistry.h>
+#include <tinyecs/MemoryUtils.h>
 
 namespace tinyecs
 {
     Archetype::Archetype(ComponentSignature signature) : _signature(signature)
     {
+        calculateColumnLayouts();
     }
 
     std::size_t Archetype::entityCount() const
@@ -82,8 +87,49 @@ namespace tinyecs
             }
         }
 
-        _chunks.emplace_back(_signature);
+        _chunks.emplace_back(_columnLayouts, _chunkCapacity);
 
         return static_cast<std::uint32_t>(_chunks.size() - 1);
+    }
+
+    void Archetype::calculateColumnLayouts()
+    {
+        _chunkCapacity = 0;
+
+        while (calculateChunkSize(_chunkCapacity + 1) <= Chunk::Size)
+            ++_chunkCapacity;
+
+        std::size_t offset = sizeof(Entity) * _chunkCapacity;
+
+        for (ComponentType type : _signature)
+        {
+            const ComponentInfo &info = ComponentRegistry::getComponentInfo(type);
+
+            offset = alignUp(offset, info.alignment);
+
+            _columnLayouts.push_back(ColumnLayout{
+                .type = type,
+                .offset = offset,
+                .elementSize = info.size,
+                .alignment = info.alignment,
+            });
+
+            offset += info.size * _chunkCapacity;
+        }
+    }
+
+    std::size_t Archetype::calculateChunkSize(std::size_t chunkCapacity) const
+    {
+        std::size_t offset = sizeof(Entity) * chunkCapacity;
+
+        for (ComponentType type : _signature)
+        {
+            const ComponentInfo &info = ComponentRegistry::getComponentInfo(type);
+
+            offset = alignUp(offset, info.alignment);
+            offset += info.size * chunkCapacity;
+        }
+
+        return offset;
     }
 }

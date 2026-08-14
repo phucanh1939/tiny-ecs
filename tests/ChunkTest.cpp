@@ -2,9 +2,12 @@
 
 #include <cassert>
 #include <cstring>
+#include <vector>
 
 #include <tinyecs/Chunk.h>
 #include <tinyecs/ComponentRegistry.h>
+#include <tinyecs/ColumnLayout.h>
+#include <tinyecs/MemoryUtils.h>
 
 #include "TestUtils.h"
 
@@ -29,19 +32,56 @@ namespace tinyecs::test
             int value;
         };
 
-        ComponentSignature createPositionSignature()
+        constexpr std::size_t TestCapacity = 128;
+
+        std::vector<ColumnLayout> createPositionLayouts()
         {
-            ComponentSignature signature;
-            signature.add(ComponentRegistry::getComponentType<Position>());
-            return signature;
+            const ComponentType positionType =
+                ComponentRegistry::getComponentType<Position>();
+
+            return {
+                ColumnLayout{
+                    .type = positionType,
+                    .offset = sizeof(Entity) * TestCapacity,
+                    .elementSize = sizeof(Position),
+                    .alignment = alignof(Position),
+                },
+            };
         }
 
-        ComponentSignature createPositionVelocitySignature()
+        std::vector<ColumnLayout> createPositionVelocityLayouts()
         {
-            ComponentSignature signature;
-            signature.add(ComponentRegistry::getComponentType<Position>());
-            signature.add(ComponentRegistry::getComponentType<Velocity>());
-            return signature;
+            const ComponentType positionType =
+                ComponentRegistry::getComponentType<Position>();
+
+            const ComponentType velocityType =
+                ComponentRegistry::getComponentType<Velocity>();
+
+            std::size_t offset = sizeof(Entity) * TestCapacity;
+
+            offset = alignUp(offset, alignof(Position));
+
+            const std::size_t positionOffset = offset;
+            offset += sizeof(Position) * TestCapacity;
+
+            offset = alignUp(offset, alignof(Velocity));
+
+            const std::size_t velocityOffset = offset;
+
+            return {
+                ColumnLayout{
+                    .type = positionType,
+                    .offset = positionOffset,
+                    .elementSize = sizeof(Position),
+                    .alignment = alignof(Position),
+                },
+                ColumnLayout{
+                    .type = velocityType,
+                    .offset = velocityOffset,
+                    .elementSize = sizeof(Velocity),
+                    .alignment = alignof(Velocity),
+                },
+            };
         }
     }
 
@@ -60,7 +100,8 @@ namespace tinyecs::test
 
     void ChunkTest::testEmpty()
     {
-        Chunk chunk(createPositionSignature());
+        auto layouts = createPositionLayouts();
+        Chunk chunk(layouts, TestCapacity);
 
         assert(chunk.entityCount() == 0);
         assert(!chunk.full());
@@ -70,7 +111,8 @@ namespace tinyecs::test
 
     void ChunkTest::testAddEntity()
     {
-        Chunk chunk(createPositionSignature());
+        auto layouts = createPositionLayouts();
+        Chunk chunk(layouts, TestCapacity);
 
         Entity entity{1, 0};
 
@@ -85,28 +127,31 @@ namespace tinyecs::test
 
     void ChunkTest::testFull()
     {
-        Chunk chunk(createPositionSignature());
+        auto layouts = createPositionLayouts();
+        Chunk chunk(layouts, TestCapacity);
 
-        for (std::uint32_t i = 0; i < Chunk::Capacity; ++i)
+        for (std::uint32_t i = 0; i < TestCapacity; ++i)
         {
             const std::uint32_t index = chunk.addEntity(Entity{i, 0});
             assert(index == i);
         }
 
-        assert(chunk.entityCount() == Chunk::Capacity);
+        assert(chunk.entityCount() == TestCapacity);
         assert(chunk.full());
 
-        const std::uint32_t index = chunk.addEntity(Entity{999, 0});
+        const std::uint32_t index =
+            chunk.addEntity(Entity{999, 0});
 
         assert(index == Chunk::InvalidIndex);
-        assert(chunk.entityCount() == Chunk::Capacity);
+        assert(chunk.entityCount() == TestCapacity);
 
         printPassed("Chunk::full");
     }
 
     void ChunkTest::testGetEntity()
     {
-        Chunk chunk(createPositionSignature());
+        auto layouts = createPositionLayouts();
+        Chunk chunk(layouts, TestCapacity);
 
         Entity first{1, 0};
         Entity second{2, 0};
@@ -122,31 +167,32 @@ namespace tinyecs::test
 
     void ChunkTest::testGetComponent()
     {
-        ComponentSignature signature;
+        auto layouts = createPositionLayouts();
 
-        const ComponentType positionType = ComponentRegistry::getComponentType<Position>();
+        const ComponentType positionType =
+            ComponentRegistry::getComponentType<Position>();
 
-        signature.add(positionType);
-
-        Chunk chunk(signature);
+        Chunk chunk(layouts, TestCapacity);
 
         chunk.addEntity(Entity{1, 0});
 
         Position position{10.0f, 20.0f};
 
-        void *data = chunk.getComponent(positionType, 0);
+        void* data = chunk.getComponent(positionType, 0);
 
         assert(data != nullptr);
 
         std::memcpy(data, &position, sizeof(Position));
 
-        const auto *result = static_cast<const Position *>(chunk.getComponent(positionType, 0));
+        const auto* result =
+            static_cast<const Position*>(
+                chunk.getComponent(positionType, 0));
 
         assert(result->x == 10.0f);
         assert(result->y == 20.0f);
 
-        // Component not present.
-        const ComponentType velocityType = ComponentRegistry::getComponentType<Velocity>();
+        const ComponentType velocityType =
+            ComponentRegistry::getComponentType<Velocity>();
 
         assert(chunk.getComponent(velocityType, 0) == nullptr);
 
@@ -155,7 +201,8 @@ namespace tinyecs::test
 
     void ChunkTest::testRemoveLast()
     {
-        Chunk chunk(createPositionSignature());
+        auto layouts = createPositionLayouts();
+        Chunk chunk(layouts, TestCapacity);
 
         Entity first{1, 0};
         Entity second{2, 0};
@@ -174,7 +221,8 @@ namespace tinyecs::test
 
     void ChunkTest::testRemoveSwapBack()
     {
-        Chunk chunk(createPositionSignature());
+        auto layouts = createPositionLayouts();
+        Chunk chunk(layouts, TestCapacity);
 
         Entity first{1, 0};
         Entity second{2, 0};
@@ -197,18 +245,17 @@ namespace tinyecs::test
 
     void ChunkTest::testCopyEntity()
     {
-        const ComponentType positionType = ComponentRegistry::getComponentType<Position>();
-        const ComponentType velocityType = ComponentRegistry::getComponentType<Velocity>();
+        const ComponentType positionType =
+            ComponentRegistry::getComponentType<Position>();
 
-        ComponentSignature sourceSignature;
-        sourceSignature.add(positionType);
-        sourceSignature.add(velocityType);
+        const ComponentType velocityType =
+            ComponentRegistry::getComponentType<Velocity>();
 
-        ComponentSignature destinationSignature;
-        destinationSignature.add(positionType);
+        auto sourceLayouts = createPositionVelocityLayouts();
+        auto destinationLayouts = createPositionLayouts();
 
-        Chunk source(sourceSignature);
-        Chunk destination(destinationSignature);
+        Chunk source(sourceLayouts, TestCapacity);
+        Chunk destination(destinationLayouts, TestCapacity);
 
         Entity entity{1, 0};
 
@@ -217,21 +264,30 @@ namespace tinyecs::test
         Position position{10.0f, 20.0f};
         Velocity velocity{30.0f, 40.0f};
 
-        std::memcpy(source.getComponent(positionType, 0),&position,sizeof(Position));
-        std::memcpy(source.getComponent(velocityType, 0), &velocity, sizeof(Velocity));
+        std::memcpy(
+            source.getComponent(positionType, 0),
+            &position,
+            sizeof(Position));
 
-        const std::uint32_t destinationIndex = source.copyEntity(0, destination);
+        std::memcpy(
+            source.getComponent(velocityType, 0),
+            &velocity,
+            sizeof(Velocity));
+
+        const std::uint32_t destinationIndex =
+            source.copyEntity(0, destination);
 
         assert(destinationIndex == 0);
         assert(destination.entityCount() == 1);
         assert(destination.getEntity(0) == entity);
 
-        const auto *copiedPosition =static_cast<const Position *>(destination.getComponent(positionType, 0));
+        const auto* copiedPosition =
+            static_cast<const Position*>(
+                destination.getComponent(positionType, 0));
 
         assert(copiedPosition->x == 10.0f);
         assert(copiedPosition->y == 20.0f);
 
-        // Velocity isn't part of destination.
         assert(destination.getComponent(velocityType, 0) == nullptr);
 
         printPassed("Chunk::copyEntity");
@@ -239,22 +295,21 @@ namespace tinyecs::test
 
     void ChunkTest::testCopyEntityToFullChunk()
     {
-        ComponentSignature signature = createPositionSignature();
+        auto layouts = createPositionLayouts();
 
-        Chunk source(signature);
-        Chunk destination(signature);
+        Chunk source(layouts, TestCapacity);
+        Chunk destination(layouts, TestCapacity);
 
         source.addEntity(Entity{1, 0});
 
-        for (std::uint32_t i = 0; i < Chunk::Capacity; ++i)
-        {
+        for (std::uint32_t i = 0; i < TestCapacity; ++i)
             destination.addEntity(Entity{i, 0});
-        }
 
-        const std::uint32_t index = source.copyEntity(0, destination);
+        const std::uint32_t index =
+            source.copyEntity(0, destination);
 
         assert(index == Chunk::InvalidIndex);
-        assert(destination.entityCount() == Chunk::Capacity);
+        assert(destination.entityCount() == TestCapacity);
 
         printPassed("Chunk::copyEntity full destination");
     }

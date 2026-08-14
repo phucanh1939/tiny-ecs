@@ -26,7 +26,8 @@ namespace tinyecs
         ComponentInfo info
         {
             .type = _nextType++,
-            .size = sizeof(T)
+            .size = sizeof(T),
+            .alignment = alignof(T)
         };
 
         _types[type] = info.type;

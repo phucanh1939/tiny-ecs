@@ -53,14 +53,14 @@ namespace tinyecs::test
         EntityLocation secondLocation = archetype.addEntity(second);
         EntityLocation thirdLocation = archetype.addEntity(third);
 
-        auto* firstPosition = static_cast<Position*>(archetype.getComponent(positionType, firstLocation));
-        auto* firstVelocity = static_cast<Velocity*>(archetype.getComponent(velocityType, firstLocation));
+        auto *firstPosition = static_cast<Position *>(archetype.getComponent(positionType, firstLocation));
+        auto *firstVelocity = static_cast<Velocity *>(archetype.getComponent(velocityType, firstLocation));
 
-        auto* secondPosition = static_cast<Position*>(archetype.getComponent(positionType, secondLocation));
-        auto* secondVelocity = static_cast<Velocity*>(archetype.getComponent(velocityType, secondLocation));
+        auto *secondPosition = static_cast<Position *>(archetype.getComponent(positionType, secondLocation));
+        auto *secondVelocity = static_cast<Velocity *>(archetype.getComponent(velocityType, secondLocation));
 
-        auto* thirdPosition = static_cast<Position*>(archetype.getComponent(positionType, thirdLocation));
-        auto* thirdVelocity = static_cast<Velocity*>(archetype.getComponent(velocityType, thirdLocation));
+        auto *thirdPosition = static_cast<Position *>(archetype.getComponent(positionType, thirdLocation));
+        auto *thirdVelocity = static_cast<Velocity *>(archetype.getComponent(velocityType, thirdLocation));
 
         *firstPosition = {10.0f, 20.0f};
         *firstVelocity = {1.0f, 2.0f};
@@ -129,7 +129,9 @@ namespace tinyecs::test
         ComponentSignature signature;
         Archetype archetype(signature);
 
-        for (std::uint32_t i = 0; i < Chunk::Capacity + 1; ++i)
+        // Fill full a chunk and next 10 items to the 2nd chunk
+        std::uint32_t enittyCount = archetype.chunkCapacity() + 10;
+        for (std::uint32_t i = 0; i < enittyCount; ++i)
         {
             archetype.addEntity(Entity{i, 1});
         }
@@ -145,40 +147,40 @@ namespace tinyecs::test
             ++count;
         }
 
-        assert(count == Chunk::Capacity + 1);
+        assert(count == enittyCount);
         assert(archetype.chunkCount() == 2);
 
         printPassed("Query::iterate multiple chunks");
     }
 
     void QueryTest::testSkipEmptyArchetype()
-{
-    ComponentSignature signature;
-
-    Archetype first(signature);
-    Archetype empty(signature);
-    Archetype last(signature);
-
-    Entity firstEntity{1, 1};
-    Entity lastEntity{2, 1};
-
-    first.addEntity(firstEntity);
-    last.addEntity(lastEntity);
-
-    Query<> query({&first, &empty, &last});
-
-    std::vector<Entity> result;
-
-    for (auto it = query.begin(); it != query.end(); ++it)
     {
-        auto [entity] = *it;
-        result.push_back(entity);
+        ComponentSignature signature;
+
+        Archetype first(signature);
+        Archetype empty(signature);
+        Archetype last(signature);
+
+        Entity firstEntity{1, 1};
+        Entity lastEntity{2, 1};
+
+        first.addEntity(firstEntity);
+        last.addEntity(lastEntity);
+
+        Query<> query({&first, &empty, &last});
+
+        std::vector<Entity> result;
+
+        for (auto it = query.begin(); it != query.end(); ++it)
+        {
+            auto [entity] = *it;
+            result.push_back(entity);
+        }
+
+        assert(result.size() == 2);
+        assert(result[0] == firstEntity);
+        assert(result[1] == lastEntity);
+
+        printPassed("Query::skip empty archetype");
     }
-
-    assert(result.size() == 2);
-    assert(result[0] == firstEntity);
-    assert(result[1] == lastEntity);
-
-    printPassed("Query::skip empty archetype");
-}
 }

@@ -19,7 +19,8 @@ namespace tinyecs
     //
     struct ComponentInfo
     {
-        ComponentType type;
-        std::size_t size;
+        ComponentType type;    // Component type identifier.
+        std::size_t size;      // Size in bytes of one component.
+        std::size_t alignment; // Alignment requirement of the component.
     };
 }

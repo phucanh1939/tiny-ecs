@@ -5,6 +5,7 @@
 #include <tinyecs/Chunk.h>
 #include <tinyecs/ComponentSignature.h>
 #include <tinyecs/EntityLocation.h>
+#include <tinyecs/ColumnLayout.h>
 
 namespace tinyecs
 {
@@ -53,10 +54,18 @@ namespace tinyecs
         /// @return Pointer to component data if the entity and type is exist in this Archetype, otherwise return nullptr
         const void* getComponent(ComponentType type, const EntityLocation& location) const;
 
+        /// @brief Get chunk capacity
+        /// @return Chunk capacity
+        std::size_t chunkCapacity() const { return _chunkCapacity; }
+
     private:
-        ComponentSignature _signature;
+        std::vector<ColumnLayout> _columnLayouts;
         std::vector<Chunk> _chunks;
+        ComponentSignature _signature;
+        std::size_t _chunkCapacity;
 
         std::uint32_t findOrCreateChunk();
+        void calculateColumnLayouts();
+        std::size_t calculateChunkSize(std::size_t chunkCapacity) const;
     };
 }
