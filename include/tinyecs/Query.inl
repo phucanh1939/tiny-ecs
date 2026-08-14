@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 
 #include <tinyecs/Query.h>
 #include <tinyecs/ComponentRegistry.h>
@@ -31,25 +32,24 @@ namespace tinyecs
     {
         ++_entityIndex;
 
-        // Next entity in the current chunk.
-        Archetype *archetype = _query->_archetypes[_archetypeIndex];
+        while (_archetypeIndex < _query->_archetypes.size())
+        {
+            Archetype *archetype = _query->_archetypes[_archetypeIndex];
 
-        if (_entityIndex < archetype->chunkEntityCount(_chunkIndex))
-            return *this;
+            while (_chunkIndex < archetype->chunkCount())
+            {
+                if (_entityIndex < archetype->chunkEntityCount(_chunkIndex))
+                    return *this;
 
-        // Next chunk.
-        ++_chunkIndex;
-        _entityIndex = 0;
+                ++_chunkIndex;
+                _entityIndex = 0;
+            }
 
-        if (_chunkIndex < archetype->chunkCount())
-            return *this;
+            ++_archetypeIndex;
+            _chunkIndex = 0;
+            _entityIndex = 0;
+        }
 
-        // Next archetype.
-        ++_archetypeIndex;
-        _chunkIndex = 0;
-        _entityIndex = 0;
-
-        // If there are no more archetypes, this is end().
         return *this;
     }
 

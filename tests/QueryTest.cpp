@@ -31,6 +31,7 @@ namespace tinyecs::test
         testIterate();
         testEmpty();
         testMultipleChunks();
+        testSkipEmptyArchetype();
     }
 
     void QueryTest::testIterate()
@@ -149,4 +150,35 @@ namespace tinyecs::test
 
         printPassed("Query::iterate multiple chunks");
     }
+
+    void QueryTest::testSkipEmptyArchetype()
+{
+    ComponentSignature signature;
+
+    Archetype first(signature);
+    Archetype empty(signature);
+    Archetype last(signature);
+
+    Entity firstEntity{1, 1};
+    Entity lastEntity{2, 1};
+
+    first.addEntity(firstEntity);
+    last.addEntity(lastEntity);
+
+    Query<> query({&first, &empty, &last});
+
+    std::vector<Entity> result;
+
+    for (auto it = query.begin(); it != query.end(); ++it)
+    {
+        auto [entity] = *it;
+        result.push_back(entity);
+    }
+
+    assert(result.size() == 2);
+    assert(result[0] == firstEntity);
+    assert(result[1] == lastEntity);
+
+    printPassed("Query::skip empty archetype");
+}
 }

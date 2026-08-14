@@ -11,5 +11,6 @@ namespace tinyecs::test
         static void testIterate();
         static void testEmpty();
         static void testMultipleChunks();
+        static void testSkipEmptyArchetype();
     };
 }
