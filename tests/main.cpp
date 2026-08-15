@@ -7,8 +7,9 @@
 #include "ChunkTest.h"
 #include "ArchetypeTest.h"
 #include "ArchetypeRegistryTest.h"
-#include "WorldTest.h"
 #include "QueryTest.h"
+#include "WorldTest.h"
+#include "CommandBufferTest.h"
 
 using namespace tinyecs::test;
 
@@ -22,6 +23,7 @@ int main()
     ArchetypeRegistryTest::run();
     QueryTest::run();
     WorldTest::run();
+    CommandBufferTest::run();
     std::cout << "\033[32m✓ All tests passed\033[0m\n";
     return 0;
 }

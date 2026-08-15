@@ -2,11 +2,62 @@
 
 #include <cassert>
 
-#include <tinyecs/World.h>
 #include <tinyecs/ComponentRegistry.h>
+#include "World.h"
 
 namespace tinyecs
 {
+
+    template <typename... Components>
+    Entity World::createEntity(Components &&...components)
+    {
+        // Find an ID
+        std::uint32_t id;
+        if (!_freeEntityIds.empty())
+        {
+            id = _freeEntityIds.back();
+            _freeEntityIds.pop_back();
+        }
+        else
+        {
+            id = static_cast<std::uint32_t>(_versions.size());
+            _versions.push_back(1);
+            _entityLocations.emplace_back();
+        }
+
+        // Create entity with the current version
+        Entity entity{.id = id, .version = _versions[id]};
+
+        // Construct the signature
+        ComponentSignature signature;
+        (signature.add(ComponentRegistry::getComponentType<std::decay_t<Components>>()), ...);
+
+        // Get or create archetype
+        Archetype &archetype = _archetypeRegistry.getOrCreate(signature);
+
+        // Add entity
+        const EntityLocation location = archetype.addEntity(entity);
+
+        // Update location
+        _entityLocations[id] = location;
+
+        // load component data
+        auto initializeComponent = [&](const auto& component)
+        {
+            using Component = std::decay_t<decltype(component)>;
+
+            ComponentType type = ComponentRegistry::getComponentType<Component>();
+            void *destination = archetype.getComponent(type, location);
+
+            std::memcpy(destination, &component, sizeof(Component));
+        };
+        (initializeComponent(components), ...);
+
+        ++_entityCount;
+
+        return entity;
+    }
+
     template <typename T>
     void World::addComponent(Entity entity, const T &component)
     {

@@ -30,9 +30,16 @@ namespace tinyecs
         World(World &&) noexcept = default;
         World &operator=(World &&) noexcept = default;
 
+        std::size_t entityCount() const { return _entityCount; }
+
         /// @brief Create an empty entity
         /// @return Created entity
         Entity createEntity();
+
+        /// @brief Create an empty entity with components data
+        /// @return Created entity
+        template <typename... Components>
+        Entity createEntity(Components&&... components);
         
         /// @brief Remove an entity & its components
         /// @param entity 
@@ -91,6 +98,8 @@ namespace tinyecs
         Query<Components...> query();
 
     private:
+        std::size_t _entityCount = 0;
+
         // Track version of entity.
         //
         // _versions[i] is the current version of the entity with ID i.

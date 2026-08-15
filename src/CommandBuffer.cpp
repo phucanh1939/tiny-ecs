@@ -1,31 +1,35 @@
-#include <cassert>
-
 #include <tinyecs/CommandBuffer.h>
+#include <tinyecs/World.h>
 
 namespace tinyecs
 {
     void CommandBuffer::destroyEntity(Entity entity)
     {
-        assert(false && "Not implemented");
+        _commands.push_back(std::make_unique<DestroyEntityCommand>(entity));
     }
 
     void CommandBuffer::playback(World& world)
     {
-        assert(false && "Not implemented");
+        for (auto& command : _commands)
+        {
+            command->execute(world);
+        }
+
+        clear();
     }
 
     void CommandBuffer::clear()
     {
-        assert(false && "Not implemented");
+        _commands.clear();
     }
 
     bool CommandBuffer::empty() const
     {
-        return true;
+        return _commands.empty();
     }
 
     std::size_t CommandBuffer::size() const
     {
-        return 0;
+        return _commands.size();
     }
 }

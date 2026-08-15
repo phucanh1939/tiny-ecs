@@ -36,6 +36,8 @@ namespace tinyecs
         // Update entity location
         _entityLocations[id] = location;
 
+        ++_entityCount;
+
         return entity;
     }
 
@@ -61,6 +63,8 @@ namespace tinyecs
 
         // Allow the ID to be reused.
         _freeEntityIds.push_back(entity.id);
+
+        --_entityCount;
     }
 
     bool World::isValid(Entity entity) const

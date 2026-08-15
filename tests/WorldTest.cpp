@@ -31,6 +31,7 @@ namespace tinyecs::test
     void WorldTest::run()
     {
         testCreateEntity();
+        testCreateEntityWithComponents();
         testDestroyEntity();
         testAddAndGetComponent();
         testRemoveComponent();
@@ -41,9 +42,19 @@ namespace tinyecs::test
     {
         World world;
 
+        assert(world.entityCount() == 0);
+
         Entity first = world.createEntity();
+
+        assert(world.entityCount() == 1);
+
         Entity second = world.createEntity();
+
+        assert(world.entityCount() == 2);
+
         Entity third = world.createEntity();
+
+        assert(world.entityCount() == 3);
 
         assert(first.isValid());
         assert(second.isValid());
@@ -64,6 +75,35 @@ namespace tinyecs::test
         printPassed("World::create entity");
     }
 
+    void WorldTest::testCreateEntityWithComponents()
+    {
+        World world;
+
+        assert(world.entityCount() == 0);
+
+        Entity entity = world.createEntity(
+            Position{10.0f, 20.0f},
+            Velocity{1.0f, 2.0f},
+            Health{100});
+
+        assert(world.entityCount() == 1);
+        assert(world.isValid(entity));
+
+        const Position &position = world.getComponent<Position>(entity);
+        const Velocity &velocity = world.getComponent<Velocity>(entity);
+        const Health &health = world.getComponent<Health>(entity);
+
+        assert(position.x == 10.0f);
+        assert(position.y == 20.0f);
+
+        assert(velocity.x == 1.0f);
+        assert(velocity.y == 2.0f);
+
+        assert(health.value == 100);
+
+        printPassed("World::create entity with components");
+    }
+
     void WorldTest::testDestroyEntity()
     {
         World world;
@@ -72,17 +112,24 @@ namespace tinyecs::test
         Entity second = world.createEntity();
         Entity third = world.createEntity();
 
+        assert(world.entityCount() == 3);
+
         assert(world.isValid(first));
         assert(world.isValid(second));
         assert(world.isValid(third));
 
         world.destroyEntity(second);
 
+        assert(world.entityCount() == 2);
+
         assert(!world.isValid(second));
         assert(world.isValid(first));
         assert(world.isValid(third));
 
         Entity reused = world.createEntity();
+
+        // Reusing an ID still creates one live entity.
+        assert(world.entityCount() == 3);
 
         assert(reused.id == second.id);
         assert(reused.version != second.version);
@@ -95,16 +142,24 @@ namespace tinyecs::test
     {
         World world;
         Entity entity = world.createEntity();
+
+        assert(world.entityCount() == 1);
+
         Position position{10.0f, 20.0f};
 
         world.addComponent(entity, position);
 
+        // Adding components doesn't create another entity.
+        assert(world.entityCount() == 1);
+
         const Position &result = world.getComponent<Position>(entity);
+
         assert(result.x == 10.0f);
         assert(result.y == 20.0f);
         assert(&result == &world.getComponent<Position>(entity));
 
         Position *tryResult = world.tryGetComponent<Position>(entity);
+
         assert(tryResult != nullptr);
         assert(tryResult == &world.getComponent<Position>(entity));
 
@@ -117,18 +172,25 @@ namespace tinyecs::test
     {
         World world;
         Entity entity = world.createEntity();
+
         Position position{10.0f, 20.0f};
         Velocity velocity{1.0f, 2.0f};
 
         world.addComponent(entity, position);
         world.addComponent(entity, velocity);
 
+        assert(world.entityCount() == 1);
+
         assert(world.tryGetComponent<Position>(entity) != nullptr);
         assert(world.tryGetComponent<Velocity>(entity) != nullptr);
 
         world.removeComponent<Velocity>(entity);
 
+        // Removing a component doesn't destroy the entity.
+        assert(world.entityCount() == 1);
+
         const Position &result = world.getComponent<Position>(entity);
+
         assert(result.x == 10.0f);
         assert(result.y == 20.0f);
 
@@ -147,12 +209,17 @@ namespace tinyecs::test
         Entity positionVelocity = world.createEntity();
         Entity velocityOnly = world.createEntity();
 
+        assert(world.entityCount() == 3);
+
         world.addComponent(positionOnly, Position{10.0f, 20.0f});
 
         world.addComponent(positionVelocity, Position{30.0f, 40.0f});
         world.addComponent(positionVelocity, Velocity{3.0f, 4.0f});
 
         world.addComponent(velocityOnly, Velocity{5.0f, 6.0f});
+
+        // Querying and adding components don't affect entity count.
+        assert(world.entityCount() == 3);
 
         auto query = world.query<Position, Velocity>();
 
@@ -170,9 +237,11 @@ namespace tinyecs::test
 
             ++count;
         }
+
         assert(count == 1);
 
         count = 0;
+
         for (auto [entity, position, velocity] : query)
         {
             assert(entity == positionVelocity);
@@ -185,6 +254,7 @@ namespace tinyecs::test
         }
 
         assert(count == 1);
+        assert(world.entityCount() == 3);
 
         printPassed("World::query");
     }

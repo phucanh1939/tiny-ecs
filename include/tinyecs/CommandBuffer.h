@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 #include <tinyecs/Entity.h>
@@ -16,6 +17,9 @@ namespace tinyecs
 
         CommandBuffer(const CommandBuffer &) = delete;
         CommandBuffer &operator=(const CommandBuffer &) = delete;
+
+        template <typename... Components>
+        void createEntity(Components &&...components);
 
         void destroyEntity(Entity entity);
 
@@ -33,7 +37,24 @@ namespace tinyecs
         std::size_t size() const;
 
     private:
-        // Commands are stored here and executed during playback.
+        struct ICommand
+        {
+            virtual ~ICommand() = default;
+            virtual void execute(World &world) = 0;
+        };
+
+        template <typename... Components>
+        struct CreateEntityCommand;
+
+        struct DestroyEntityCommand;
+
+        template <typename T>
+        struct AddComponentCommand;
+
+        template <typename T>
+        struct RemoveComponentCommand;
+
+        std::vector<std::unique_ptr<ICommand>> _commands;
     };
 }
 
