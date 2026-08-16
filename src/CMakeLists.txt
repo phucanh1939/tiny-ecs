@@ -1,9 +1,15 @@
 add_library(tinyecs)
 
+file(
+    GLOB TINYECS_SOURCES
+    CONFIGURE_DEPENDS
+        *.cpp
+)
+
 target_sources(
     tinyecs
     PRIVATE
-        World.cpp
+        ${TINYECS_SOURCES}
 )
 
 target_include_directories(
