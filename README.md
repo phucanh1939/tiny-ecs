@@ -39,7 +39,7 @@ Chunk
 Component data
 ```
 
-See **[Architecture](docs/architecture.md)** for the full design.
+See **[Architecture](docs/Architecture.md)** for the full design.
 
 ## Example
 
@@ -88,12 +88,12 @@ commands.playback(world);
 
 ## Documentation
 
-* **[Architecture](docs/architecture.md)** — Overall design and data flow
-* **[Entities](docs/entity.md)** — Entity IDs, versions, locations, and lifecycle
-* **[Archetypes](docs/archetype.md)** — Signatures, migration, and archetype registry
-* **[Chunks](docs/chunk.md)** — Memory layout, capacity, columns, and swap-back removal
-* **[Queries](docs/query.md)** — Query matching and iteration
-* **[Command Buffer](docs/command-buffer.md)** — Deferred structural changes
+* **[Architecture](docs/Architecture.md)** — Overall design and data flow
+* **[Entities](docs/Entity.md)** — Entity IDs, versions, locations, and lifecycle
+* **[Archetypes](docs/Archetype.md)** — Signatures, migration, and archetype registry
+* **[Chunks](docs/Chunk.md)** — Memory layout, capacity, columns, and swap-back removal
+* **[Queries](docs/Query.md)** — Query matching and iteration
+* **[Command Buffer](docs/Command-buffer.md)** — Deferred structural changes
 
 ## Project Goal
 
